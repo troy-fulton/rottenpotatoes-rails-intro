@@ -13,3 +13,10 @@
  *= require_tree .
  *= require_self
  */
+
+/*
+As required for part 1 of rails intro
+*/
+table#movies th.hilite {
+  background-color: yellow;
+}

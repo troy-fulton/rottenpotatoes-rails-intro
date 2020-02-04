@@ -20,6 +20,34 @@ test:
   <<: *default
   database: db/test.sqlite3
 
+## MODIFIED... ##
+
+# production:
+#   <<: *default
+#   database: db/production.sqlite3
+
+
+# default: &default
+#   adapter: postgresql
+#   encoding: unicode
+#   # For details on connection pooling, see Rails configuration guide
+#   # http://guides.rubyonrails.org/configuring.html#database-pooling
+#   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+ 
+# development:
+#   <<: *default
+#   database: myapp_development
+ 
+# test:
+#   <<: *default
+#   database: myapp_test
+ 
 production:
-  <<: *default
-  database: db/production.sqlite3
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see Rails configuration guide
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  database: myapp_production
+  username: myapp
+  password: <%= ENV['MYAPP_DATABASE_PASSWORD'] %>
