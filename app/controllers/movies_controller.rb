@@ -17,17 +17,30 @@ class MoviesController < ApplicationController
     @all_ratings = all_ratings_movies.map do |m| m.rating end.sort
     
     # See if the user clicked the refresh button to filter by rating
-    refresh_clicked = (params.has_key? :commit) && (params[:commit] == "Refresh")
+    # or clicked a heading to sort a column
+    refresh_clicked = (params.has_key? :commit) && (params[:commit] == "Refresh") && (params.has_key? :ratings)
+    sorted_clicked = params.has_key? :sort_by
     
     # Start up a hash with all these ratings and populate it with either
     # all selected (before clicking refresh) or with user-selected checkboxes
     @ratings_selected = Hash.new
-    logger.debug(params[:ratings])
-    for rating in @all_ratings
-      if refresh_clicked
+    
+    # If there are new settings, use those. 
+    if refresh_clicked
+      for rating in @all_ratings
         # (i) See which boxes the user picked
         @ratings_selected[rating] = params[:ratings].has_key?(rating)
-      else
+      end
+
+    # If the session remembers settings, use those. 
+    elsif session.has_key? :ratings
+      # To stay RESTful, use params for sorting, but retrieve session ratings
+      flash.keep
+      redirect_to movies_path(:sort_by => params[:sort_by], :commit => session[:commit], :ratings => session[:ratings]) and return
+    
+    # Otherwise, just set all checkboxes
+    else
+      for rating in @all_ratings
         @ratings_selected[rating] = true
       end
     end
@@ -36,8 +49,18 @@ class MoviesController < ApplicationController
     filtered_ratings = @ratings_selected.select{|k,v| v}.keys
     @movies = Movie.with_ratings(filtered_ratings)
     
+    # Again, first check params, then session for any sorting settings
+    sort_by = ""
+    if sorted_clicked
+      sort_by = params[:sort_by]
+    elsif session.has_key? :sort_by
+      # To stay RESTful, use ratings from params, but use sorting from the session
+      flash.keep
+      redirect_to movies_path(:sort_by => session[:sort_by], :commit => params[:commit], :ratings => params[:ratings]) and return
+    end
+    
     # Then sort the movies (if it needs to be done)
-    case params[:sort_by]
+    case sort_by
     when "title"
       @movies = @movies.order(:title)
       @title_header_css_class = "hilite"
@@ -48,10 +71,15 @@ class MoviesController < ApplicationController
       @movies = @movies.order(:release_date)
       @release_date_header_css_class = "hilite"
     end
-  end
-  
-  def sort
-    redirect_to movies_path(:sort_by =>params[:sort_by])
+    
+    # Finally, have the session remember any new settings
+    if sorted_clicked
+      session[:sort_by] = params[:sort_by]
+    end
+    if refresh_clicked
+      session[:ratings] = params[:ratings]
+      session[:commit] = params[:commit]
+    end
   end
 
   def new
