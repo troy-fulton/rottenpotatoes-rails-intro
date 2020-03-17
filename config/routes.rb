@@ -16,6 +16,12 @@ Rails.application.routes.draw do
 
   resources :movies
   
+  # New routes associated with Omniauth
+  get 'auth/:provider/callback' => 'sessions#create'
+  post 'logout' => 'sessions#destroy'
+  get 'auth/failure' => 'sessions#failure'
+  get 'auth/twitter', :as => 'login'
+  
   # Example resource route with options:
   #   resources :products do
   #     member do
