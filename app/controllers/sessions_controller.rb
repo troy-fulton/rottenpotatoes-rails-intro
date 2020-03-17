@@ -3,7 +3,7 @@ class SessionsController < ApplicationController
     def create
         auth = request.env["omniauth.auth"]
         @current_user = Moviegoer.find_by(:provider => auth["provider"], :uid => auth["uid"])
-        if user == nil
+        if @current_user == nil
             @current_user = Moviegoer.create_with_omniauth(auth)
         end
         session[:user_id] = user.id
