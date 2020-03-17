@@ -7,7 +7,7 @@ class SessionsController < ApplicationController
             user = Moviegoer.create_with_omniauth(auth)
         end
         session[:user_id] = user.id
-        flash[:notice] = 'Logged #{@current_user.name} in successfully'
+        flash[:notice] = 'Logged ' + @current_user.name.to_s + ' in successfully'
         redirect_to movies_path
     end
     def destroy
