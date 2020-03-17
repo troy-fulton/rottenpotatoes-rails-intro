@@ -5,6 +5,7 @@ class SessionsController < ApplicationController
         @current_user = Moviegoer.find_by(:provider => auth["provider"], :uid => auth["uid"])
         if @current_user == nil
             @current_user = Moviegoer.create_with_omniauth(auth)
+            ApplicationController.set_current_user
         end
         session[:user_id] = @current_user.id
         flash[:notice] = 'Logged ' + @current_user.name.to_s + ' in successfully'
